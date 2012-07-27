@@ -1,2 +1,3 @@
-famous-server
+Famous Namous
 =============
+How much is your name worth?
