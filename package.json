@@ -5,7 +5,9 @@
     "author": "Jonathan Azoff <jon@azoffdesign.com>",
     "dependencies": {
         "async":  "0.1.x",
-        "stripe": "1.1.x"
+        "stripe": "1.1.x",
+	    "jayson": "1.0.x",
+	    "log4js": "0.5.x"
     },
     "engine": "node >= 0.8.4"
 }
