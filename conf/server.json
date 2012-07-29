@@ -1,0 +1,7 @@
+{
+	"debug": true,
+	"version": "0.0.1",
+	"service": "Famous API Server",
+	"hostname": "localhost",
+	"port": 1337
+}

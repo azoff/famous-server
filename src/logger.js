@@ -1,4 +1,4 @@
-(function(modulw){
+(function(){
 
 	"use strict";
 
@@ -9,12 +9,12 @@
 		cwd: project.rootDir
 	});
 
-	modulw.console = log4js.getLogger();
-	modulw.access = log4js.getLogger('[access]');
-	var error = modulw.error = log4js.getLogger('[error]');
+	exports.console = log4js.getLogger();
+	exports.access = log4js.getLogger('[access]');
+	var error = exports.error = log4js.getLogger('[error]');
 
-	modulw.uncaughtExceptionHandler = function(ex){
+	exports.uncaughtExceptionHandler = function(ex){
 		error.fatal(ex);
 	};
 
-})(exports);
+})();
