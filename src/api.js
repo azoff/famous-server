@@ -16,6 +16,17 @@
 		});
 	}
 
+	function chargesCreate(params, callback) {
+		if (params.call) {
+			params('Missing required parameters to create charge');
+		} else {
+			stripe.charges.create(params, function(a,b){
+				logger.console.debug(a, b);
+				callback(a, b);
+			});
+		}
+	}
+
 	function chargesList(params, callback) {
 		if (params.call) {
 			callback = params;
@@ -26,7 +37,7 @@
 
 	function customersCreate(params, callback) {
 		if (params.call) {
-			params('Missing required parameters to create customer.');
+			params('Missing required parameters to create customer');
 		} else {
 			stripe.customers.create(params, callback);
 		}
@@ -47,8 +58,9 @@
 	}
 
 	// PUBLIC API
-	method('_profile', _profile, 0);
-	method('charges.list', chargesList, 1);
+	method('_profile',         _profile,        0);
+	method('charges.create',   chargesCreate,   1);
+	method('charges.list',     chargesList,     1);
 	method('customers.create', customersCreate, 1);
 
 })();
