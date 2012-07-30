@@ -2,13 +2,34 @@
 
 	"use strict";
 
-	var logger = require('src/logger');
+	var fs = require('fs');
+	var project = require('src/project');
+	var logger  = require('src/logger');
+	var config = fs.readFileSync(project.stripeConfFile, 'utf8');
+	var settings = JSON.parse(config);
+	var stripe  = require('stripe')(settings.apiSecret);
 
-	function stats(callback) {
+	function _profile(callback) {
 		callback(null, {
 			hrtime: process.hrtime(),
 			memory: process.memoryUsage()
 		});
+	}
+
+	function chargesList(params, callback) {
+		if (params.call) {
+			callback = params;
+			params = {};
+		}
+		stripe.charges.list(params, callback);
+	}
+
+	function customersCreate(params, callback) {
+		if (params.call) {
+			params('Missing required parameters to create customer.');
+		} else {
+			stripe.customers.create(params, callback);
+		}
 	}
 
 	function method(name, fn, expected) {
@@ -26,6 +47,8 @@
 	}
 
 	// PUBLIC API
-	method('stats', stats, 0);
+	method('_profile', _profile, 0);
+	method('charges.list', chargesList, 1);
+	method('customers.create', customersCreate, 1);
 
 })();
