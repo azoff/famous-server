@@ -43,6 +43,10 @@
 		}
 	}
 
+	function customersDethrone(params, callback) {
+		//TODO
+	}
+
 	function method(name, fn, expected) {
 		exports[name] = function() {
 			var args = Array.prototype.slice.call(arguments);
@@ -58,9 +62,10 @@
 	}
 
 	// PUBLIC API
-	method('_profile',         _profile,        0);
-	method('charges.create',   chargesCreate,   1);
-	method('charges.list',     chargesList,     1);
-	method('customers.create', customersCreate, 1);
+	method('_profile',           _profile,          0);
+	method('charges.create',     chargesCreate,     1);
+	method('charges.list',       chargesList,       1);
+	method('customers.create',   customersCreate,   1);
+	method('customers.dethrone', customersDethrone, 1);
 
 })();
