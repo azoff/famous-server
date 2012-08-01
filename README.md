@@ -4,4 +4,4 @@ How much is your name worth?
 
 TODO
 ----
-- Implement dethrone function using async
+- Implement file modification and git push on leapfrog
