@@ -3,6 +3,8 @@
 	"use strict";
 
 	var fs = require('fs');
+	var client = require('src/client');
+	var sanitizer = require('sanitizer');
 	var async = require('async');
 	var project = require('src/project');
 	var logger  = require('src/logger');
@@ -22,7 +24,6 @@
 			params('Missing required parameters to create charge');
 		} else {
 			stripe.charges.create(params, function(a,b){
-				logger.console.debug(a, b);
 				callback(a, b);
 			});
 		}
@@ -36,34 +37,39 @@
 		stripe.charges.list(params, callback);
 	}
 
-	function customersCreate(params, callback) {
-		if (params.call) {
-			params('Missing required parameters to create customer');
-		} else {
-			stripe.customers.create(params, callback);
-		}
-	}
-
 	function chargesLeapfrog(params, callback) {
 		if (params.call) {
 			params('Missing required parameters to create customer');
 		} else {
 			async.waterfall([
-				// get the most recent charge
-				function(callback){
-					chargesList({ count: 1 }, callback);
-				},
-				// check to see if the current charge beats the last
-				function(response, callback){
-					var lastCharge = response.data.shift();
-					if (params.amount > lastCharge.amount) {
-						chargesCreate(params, callback);
-					} else {
-						callback('Amount must be greater than ' + lastCharge.amount);
-					}
-				}
+				async.apply(async.parallel, {
+					requestedCharge: async.apply(paramsSanitize, params), // sanitize variables
+					lastCharge: async.apply(chargesList, { count: 1 })    // and get the last charge (in parallel)
+				}),
+				paramsValidate,                                           // validate variables
+				chargesCreate,                                            // create new charge
+				paramsFormat,                                             // format the params for the template
+				clientUpdate                                              // update the client site
 			], callback);
 		}
+	}
+
+	function clientUpdate(params, callback) {
+		async.waterfall([
+			async.apply(client.template, 'content', params),
+			function (content, callback) {
+				client.template('wrapper', { content: content }, function(error, wrapper){
+					callback(error, wrapper, content);
+				});
+			},
+			function (wrapper, content, callback) {
+				client.update('auto: ' + params.name, 'index.html', wrapper, function(error, wrapper){
+					params.content = content;
+					callback(error, params);
+				});
+			}
+		], callback);
+
 	}
 
 	function method(name, fn, expected) {
@@ -81,11 +87,42 @@
 		};
 	}
 
+	function paramsFormat(params, callback) {
+		callback(null, {
+			name: params.description,
+			dollars: params.amount/100,
+			cents: params.amount%100,
+			currency: params.currency
+		});
+	}
+
+	function paramsSanitize(params, callback) {
+		params = params || {};
+		callback(null, {
+			description: sanitizer.sanitize(params.description || ''),
+			amount: parseInt(params.amount || 0, 10),
+			customer: params.customer || '',
+			currency: 'usd'
+		});
+	}
+
+	function paramsValidate(params, callback) {
+		var requestedCharge = params.requestedCharge;
+		var lastCharge = params.lastCharge.data.shift();
+		if (requestedCharge.amount <= lastCharge.amount) {
+			callback('charge amount of ' + requestedCharge.amount + ' is not greater than last charge amount of ' + lastCharge.amount);
+		} else if (requestedCharge.description.length < 4 || requestedCharge.description.length > 64) {
+			callback('charge description length must be between 4 and 64 characters');
+		} else{
+			callback(null, requestedCharge);
+		}
+	}
+
 	// PUBLIC API
 	method('_profile',         _profile,        0);
-	method('charges.create',   chargesCreate,   1);
+	//method('charges.create',   chargesCreate,   1);
 	method('charges.leapfrog', chargesLeapfrog, 1);
-	method('charges.list',     chargesList,     1);
-	method('customers.create', customersCreate, 1);
+	//method('charges.list',     chargesList,     1);
+	//method('customers.create', customersCreate, 1);
 
 })();
