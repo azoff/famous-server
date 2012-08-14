@@ -44,6 +44,14 @@
 		], callback);
 	}
 
+	function rebuild(filePath, fileContents, callback) {
+		filePath = path.join(rootDir, filePath);
+		async.series([
+			async.apply(git.checkout.bind(git), settings.branch),
+			async.apply(fs.writeFile, filePath, fileContents, 'utf8')
+		], callback);
+	}
+
 	function update(msg, filePath, fileContents, callback) {
 		filePath = path.join(rootDir, filePath);
 		async.series([
@@ -58,6 +66,7 @@
 
 	exports.money    = money;
 	exports.update   = update;
+	exports.rebuild  = rebuild;
 	exports.template = template;
 
 })();

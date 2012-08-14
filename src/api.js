@@ -54,6 +54,26 @@
 		}
 	}
 
+	function clientRebuild(callback) {
+		async.waterfall([
+			async.apply(chargesList, { count: 1 }),
+			function(response, callback){ callback(null, response.data.shift()); },
+			paramsFormat
+		], function(error, params) {
+			async.waterfall([
+				async.apply(client.template, params, 'content'),
+				function (content, callback) {
+					async.waterfall([ // and process git hooks in parallel
+						async.apply(client.template, { content: content }, 'wrapper'),
+						async.apply(client.rebuild, 'index.html')
+					], callback);
+				}
+			], function(error){
+				callback(error, params);
+			});
+		});
+	}
+
 	function clientUpdate(params, callback) {
 		async.waterfall([
 			async.apply(client.template, params, 'content'),
@@ -69,7 +89,6 @@
 				});
 			}
 		], callback);
-
 	}
 
 	function method(name, fn, expected) {
@@ -118,9 +137,10 @@
 	}
 
 	// PUBLIC API
-	method('_profile',         _profile,        0);
+	method('_profile',           _profile,        0);
 	//method('charges.create',   chargesCreate,   1);
-	method('charges.leapfrog', chargesLeapfrog, 1);
+	method('charges.leapfrog',   chargesLeapfrog, 1);
+	method('client.rebuild',     clientRebuild,   0);
 	//method('charges.list',     chargesList,     1);
 	//method('customers.create', customersCreate, 1);
 
