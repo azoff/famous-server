@@ -5,7 +5,7 @@
 	var fs       = require('fs');
 	var path     = require('path');
 	var async    = require('async');
-	var project  = require('project');
+	var project  = require('src/project');
 
 	var config   = fs.readFileSync(project.clientConfFile, 'utf8');
 	var settings = JSON.parse(config);
@@ -16,9 +16,24 @@
 	var git = require('src/git').repo(rootDir);
 
 	function render(model, view, callback) {
-		callback(null, view.replace(/\{(\w+)\}/, function(match, key){
+		callback(null, view.replace(/\{(\w+)\}/g, function(match, key){
 			return (key in model) ? model[key] : '';
 		}));
+	}
+
+	function money(num) {
+		num = num.toString().replace(/\$|\,/g, '');
+		if (isNaN(num)) { num = "0"; }
+		num = Math.floor(num * 100 + 0.50000000001);
+		var cents = num % 100;
+		num = Math.floor(num / 100).toString();
+		if (cents < 10) {
+			cents = "0" + cents;
+		}
+		for (var i = 0; i < Math.floor((num.length - (1 + i)) / 3); i++) {
+			num = num.substring(0, num.length - (4 * i + 3)) + ',' + num.substring(num.length - (4 * i + 3));
+		}
+		return num + '.' + cents;
 	}
 
 	function template(model, view, callback) {
@@ -32,13 +47,16 @@
 	function update(msg, filePath, fileContents, callback) {
 		filePath = path.join(rootDir, filePath);
 		async.series([
+			async.apply(git.checkout.bind(git), 'gh-pages'),
+			async.apply(git.pull.bind(git), '--rebase', 'origin', 'gh-pages'),
 			async.apply(fs.writeFile, filePath, fileContents, 'utf8'),
-			async.apply(git.add, filePath),
-			async.apply(git.commit, msg),
-			async.apply(git.push, 'origin', 'master')
+			async.apply(git.add.bind(git), filePath),
+			async.apply(git.commit.bind(git), msg),
+			async.apply(git.push.bind(git), 'origin', 'gh-pages')
 		], callback);
 	}
 
+	exports.money    = money;
 	exports.update   = update;
 	exports.template = template;
 

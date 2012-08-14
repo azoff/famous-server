@@ -56,16 +56,16 @@
 
 	function clientUpdate(params, callback) {
 		async.waterfall([
-			async.apply(client.template, 'content', params),
+			async.apply(client.template, params, 'content'),
 			function (content, callback) {
-				client.template('wrapper', { content: content }, function(error, wrapper){
-					callback(error, wrapper, content);
-				});
-			},
-			function (wrapper, content, callback) {
-				client.update('auto: ' + params.name, 'index.html', wrapper, function(error, wrapper){
-					params.content = content;
-					callback(error, params);
+				params.content = content;
+				callback(null, params); // send response back
+				async.waterfall([ // and process git hooks in parallel
+					async.apply(client.template, { content: content }, 'wrapper'),
+					async.apply(client.update, 'auto: ' + params.name, 'index.html')
+				], function(error) {
+					if (error) { logger.error.error(error); }
+					else { logger.access.info('Client Update!', params); }
 				});
 			}
 		], callback);
@@ -90,8 +90,7 @@
 	function paramsFormat(params, callback) {
 		callback(null, {
 			name: params.description,
-			dollars: params.amount/100,
-			cents: params.amount%100,
+			amount: client.money(params.amount/100),
 			currency: params.currency
 		});
 	}

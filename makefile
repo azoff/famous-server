@@ -1,7 +1,7 @@
-PROJECT = "FamousNamous Server"
-DIR_LOGS = "logs"
-DIR_MODULES = "node_modules"
-MAIN_JS = "src/famous.js"
+PROJECT="FamousNamous Server"
+DIR_LOGS="logs"
+DIR_MODULES="node_modules"
+MAIN_JS="src/famous.js"
 
 all: install server
 
@@ -20,6 +20,3 @@ update: ;@echo "Updating ${PROJECT}....."; \
 clean : ;
 	rm -rf ${DIR_MODULES}
 	rm -rf ${DIR_LOGS}
-
-
-.PHONY: test server install clean update

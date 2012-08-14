@@ -40,10 +40,20 @@
 		this.execute.apply(this, args);
 	};
 
+	Git.prototype.checkout = function() {
+		var args = ['checkout'].concat(Array.prototype.slice.call(arguments));
+		this.execute.apply(this, args);
+	};
+
 	Git.prototype.commit = function() {
 		var vargs = Array.prototype.slice.call(arguments);
 		var msg = vargs.shift();
 		var args = ['commit', '-m', '"' + msg + '"'].concat(vargs);
+		this.execute.apply(this, args);
+	};
+
+	Git.prototype.pull = function() {
+		var args = ['pull'].concat(Array.prototype.slice.call(arguments));
 		this.execute.apply(this, args);
 	};
 
