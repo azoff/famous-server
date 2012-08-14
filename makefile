@@ -9,11 +9,11 @@ server : ;@echo "Starting ${PROJECT}....."; \
 	export NODE_PATH=.; \
 	node ${MAIN_JS}
 
-install: ;@echo "Installing ${PROJECT}....."; \
+install : ;@echo "Installing ${PROJECT}....."; \
 	npm install
 	mkdir ${DIR_LOGS} && chmod 777 ${DIR_LOGS}
 
-update: ;@echo "Updating ${PROJECT}....."; \
+update : ;@echo "Updating ${PROJECT}....."; \
 	git pull --rebase; \
 	npm install
 
