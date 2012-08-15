@@ -20,38 +20,26 @@
 	}
 
 	function chargesCreate(params, callback) {
-		if (params.call) {
-			params('Missing required parameters to create charge');
-		} else {
-			stripe.charges.create(params, function(a,b){
-				callback(a, b);
-			});
-		}
+		stripe.charges.create(params, function(a,b){
+			callback(a, b);
+		});
 	}
 
 	function chargesList(params, callback) {
-		if (params.call) {
-			callback = params;
-			params = {};
-		}
 		stripe.charges.list(params, callback);
 	}
 
 	function chargesLeapfrog(params, callback) {
-		if (params.call) {
-			params('Missing required parameters to create customer');
-		} else {
-			async.waterfall([
-				async.apply(async.parallel, {
-					requestedCharge: async.apply(paramsSanitize, params), // sanitize variables
-					lastCharge: async.apply(chargesList, { count: 1 })    // and get the last charge (in parallel)
-				}),
-				paramsValidate,                                           // validate variables
-				chargesCreate,                                            // create new charge
-				paramsFormat,                                             // format the params for the template
-				clientUpdate                                              // update the client site
-			], callback);
-		}
+		async.waterfall([
+			async.apply(async.parallel, {
+				requestedCharge: async.apply(paramsSanitize, params), // sanitize variables
+				lastCharge: async.apply(chargesList, { count: 1 })    // and get the last charge (in parallel)
+			}),
+			paramsValidate,                                           // validate variables
+			chargesCreate,                                            // create new charge
+			paramsFormat,                                             // format the params for the template
+			clientUpdate                                              // update the client site
+		], callback);
 	}
 
 	function clientRebuild(params, callback) {
@@ -97,7 +85,7 @@
 				response = response || {};
 				if (error) {
 					logger.error.error(error);
-					response.error = error.toString();
+					response.error = error.message || error;
 				}
 				callback(response);
 			};
@@ -118,11 +106,10 @@
 	}
 
 	function paramsSanitize(params, callback) {
-		params = params || {};
 		callback(null, {
 			description: sanitizer.sanitize(params.description || ''),
-			amount: parseInt(params.amount || 0, 10),
-			customer: params.customer || '',
+			amount: parseFloat(params.amount || 0),
+			card: params.token || '',
 			currency: 'usd'
 		});
 	}
@@ -131,10 +118,13 @@
 		var requestedCharge = params.requestedCharge;
 		var lastCharge = params.lastCharge.data.shift();
 		if (requestedCharge.amount <= lastCharge.amount) {
-			callback('charge amount of ' + requestedCharge.amount + ' is not greater than last charge amount of ' + lastCharge.amount);
+			callback('Charge amount of ' + (requestedCharge.amount/100) +
+				' is not greater than last charge amount of ' + (lastCharge.amount/100));
 		} else if (requestedCharge.description.length < 4 || requestedCharge.description.length > 64) {
-			callback('charge description length must be between 4 and 64 characters');
-		} else{
+			callback('Charge description length must be between 4 and 64 characters');
+		} else if(!params.requestedCharge.card) {
+			callback('Unable to process payment at this time');
+		} else {
 			callback(null, requestedCharge);
 		}
 	}

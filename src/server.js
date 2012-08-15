@@ -14,9 +14,9 @@
 	var server = express();
 
 	server.get('/:method', function(req, res){
-		if (settings.debug) { logger.access.debug(req.params); }
+		if (settings.debug) { logger.access.debug(req.params.method, req.query); }
 		if (req.params.method in api) {
-			api[req.params.method].call(api, req.params, res.json.bind(res));
+			api[req.params.method].call(api, req.query, res.json.bind(res));
 		} else {
 			res.json({ error: 'method missing' });
 		}
