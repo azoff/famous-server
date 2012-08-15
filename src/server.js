@@ -15,7 +15,11 @@
 
 	server.get('/:method', function(req, res){
 		if (settings.debug) { logger.access.debug(req.params); }
-		api[req.params.method].call(api, req.params, res.json.bind(res));
+		if (req.params.method in api) {
+			api[req.params.method].call(api, req.params, res.json.bind(res));
+		} else {
+			res.json({ error: 'method missing' });
+		}
 	});
 
 	exports.start = function(){
