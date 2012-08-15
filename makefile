@@ -4,17 +4,20 @@ DIR_MODULES="node_modules"
 MAIN_JS="src/famous.js"
 RUNNER_JS="node_modules/supervisor/lib/cli-wrapper.js"
 
-all: install server
+all : install server
 
-server : ;@echo "Starting ${PROJECT}....."; \
+server : ;
 	export NODE_PATH=.; \
 	nohup node ${RUNNER_JS} ${MAIN_JS} &> ${DIR_LOGS}/nohup.log &
 
-install : ;@echo "Installing ${PROJECT}....."; \
+kill : ;
+	killall node
+
+install : ;
 	npm install
 	if [ ! -d ${DIR_LOGS} ] ; then mkdir -m 777 ${DIR_LOGS} ; fi
 
-update : ;@echo "Updating ${PROJECT}....."; \
+update : ;
 	git pull --rebase; \
 	npm install
 
