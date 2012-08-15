@@ -12,7 +12,7 @@
 	var settings = JSON.parse(config);
 	var stripe  = require('stripe')(settings.apiSecret);
 
-	function _profile(callback) {
+	function _profile(params, callback) {
 		callback(null, {
 			hrtime: process.hrtime(),
 			memory: process.memoryUsage()
@@ -54,7 +54,7 @@
 		}
 	}
 
-	function clientRebuild(callback) {
+	function clientRebuild(params, callback) {
 		async.waterfall([
 			async.apply(chargesList, { count: 1 }),
 			function(response, callback){ callback(null, response.data.shift()); },
@@ -91,26 +91,29 @@
 		], callback);
 	}
 
-	function method(name, fn, expected) {
-		exports[name] = function() {
-			var args = Array.prototype.slice.call(arguments);
-			var callback = args.pop();
-			var safeArgs = args.slice(0, expected);
-			var safeCallback = function(error, response){
-				if (error) { logger.error.error(error); }
-				callback(error ? (error.message || error) : undefined, response);
+	function method(name, fn) {
+		exports[name] = function(params, callback) {
+			var respond = function(error, response){
+				response = response || {};
+				if (error) {
+					logger.error.error(error);
+					response.error = error.toString();
+				}
+				callback(response);
 			};
-			safeArgs.push(safeCallback);
-			try { fn.apply(exports, safeArgs); }
-			catch(e) { safeCallback(e); }
+			try { fn.call(exports, params, respond); }
+			catch(e) { respond(e); }
 		};
 	}
 
 	function paramsFormat(params, callback) {
+		var amount = params.amount/100;
 		callback(null, {
+			amount: amount,
+			next: amount + 0.01,
 			name: params.description,
-			amount: client.money(params.amount/100),
-			currency: params.currency
+			currency: params.currency,
+			money: client.money(amount)
 		});
 	}
 
@@ -137,11 +140,8 @@
 	}
 
 	// PUBLIC API
-	method('_profile',           _profile,        0);
-	//method('charges.create',   chargesCreate,   1);
-	method('charges.leapfrog',   chargesLeapfrog, 1);
-	method('client.rebuild',     clientRebuild,   0);
-	//method('charges.list',     chargesList,     1);
-	//method('customers.create', customersCreate, 1);
+	method('_profile',         _profile);
+	method('charges.leapfrog', chargesLeapfrog);
+	method('client.rebuild',   clientRebuild);
 
 })();

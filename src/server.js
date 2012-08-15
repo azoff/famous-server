@@ -3,7 +3,7 @@
 	"use strict";
 
 	var fs = require('fs');
-	var jayson = require('jayson');
+	var express = require('express');
 	var api = require('src/api');
 	var project = require('src/project');
 	var logger = require('src/logger');
@@ -11,22 +11,16 @@
 	var config = fs.readFileSync(project.serverConfFile, 'utf8');
 	var settings = JSON.parse(config);
 
-	var server = jayson.server(api);
+	var server = express();
 
-	// enables access logging
-	if (settings.debug) {
-		server.on('request', function(request){
-			var params = request.params && request.params.length ? JSON.stringify(request.params) : '';
-			logger.access.debug(request.id+' => ' + request.method + params);
-		});
-		server.on('response', function(request, response){
-			logger.access.debug(request.id + ' <= ', response.result);
-		});
-	}
+	server.get('/:method', function(req, res){
+		if (settings.debug) { logger.access.debug(req.params); }
+		api[req.params.method].call(api, req.params, res.json.bind(res));
+	});
 
 	exports.start = function(){
 		logger.access.info('Attempting to start RPC server...');
-		server.http().listen(settings.port, settings.hostname, function(){
+		server.listen(settings.port, settings.hostname, function(){
 			logger.access.info('Server started: http://' + settings.hostname + ':' + settings.port);
 		});
 	};

@@ -5,9 +5,9 @@
 	"author": "Jonathan Azoff <jon@azoffdesign.com>",
 	"dependencies": {
 		"async":      "0.1.x",
+		"express":    "3.0.x",
 		"stripe":     "1.1.x",
 		"money":      "0.1.x",
-		"jayson":     "1.0.x",
 		"log4js":     "0.5.x",
 		"supervisor": "0.4.x",
 		"sanitizer":  "0.0.x"
