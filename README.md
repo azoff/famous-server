@@ -5,7 +5,11 @@ How much is your name worth?
 TODO
 ----
 
-* Activate stripe account
-* Purchase and set up EC2 instance
+* Create cloud instance
+* Create nc-notification server
+* Create log appender for nc-notifications
+* Implement logger on client update, and server crash (or shutdown)
 * Create branch for deployment
-* Plant conf files on deployment server
+* Point subdomain at instance
+* Add makefile deploy target
+  * runs git pull on server
