@@ -44,22 +44,38 @@
 
 	function clientRebuild(params, callback) {
 		async.waterfall([
-			async.apply(chargesList, { count: 1 }),
-			function(response, callback){ callback(null, response.data.shift()); },
-			paramsFormat
-		], function(error, params) {
-			async.waterfall([
-				async.apply(client.template, params, 'content'),
-				function (content, callback) {
-					async.waterfall([ // and process git hooks in parallel
-						async.apply(client.template, { content: content }, 'wrapper'),
-						async.apply(client.rebuild, 'index.html')
-					], callback);
-				}
-			], function(error){
-				callback(error, params);
-			});
+			async.apply(client.template, params, params.template),
+			function (content, callback) {
+				params.content = content;
+				async.waterfall([ // and process git hooks in parallel
+					async.apply(client.template, { content: content }, 'wrapper'),
+					async.apply(client.rebuild, params.file)
+				], callback);
+			}
+		], function(error){
+			callback(error, params);
 		});
+	}
+
+	function clientRebuildIndex(params, callback) {
+		async.waterfall([
+			async.apply(chargesList, { count: 1 }),
+			function(response, callback){
+				callback(null, response.data.shift());
+			},
+			paramsFormat,
+			function(params, callback) {
+				params.template = 'content';
+				params.file     = 'index.html';
+				clientRebuild(params, callback);
+			}
+		], callback);
+	}
+
+	function clientRebuildFaq(params, callback) {
+		params.template = 'faq';
+		params.file     = 'faq.html';
+		clientRebuild(params, callback);
 	}
 
 	function clientUpdate(params, callback) {
@@ -132,6 +148,7 @@
 	// PUBLIC API
 	method('_profile',         _profile);
 	method('charges.leapfrog', chargesLeapfrog);
-	method('client.rebuild',   clientRebuild);
+	method('client.index',     clientRebuildIndex);
+	method('client.faq',       clientRebuildFaq);
 
 })();
