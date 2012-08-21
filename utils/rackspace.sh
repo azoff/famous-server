@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# install git ssh keys first
+
 NODE_VERSION=v0.8.7
 
 apt-get install -y git make gcc g++
@@ -15,4 +17,7 @@ git reset --hard $NODE_VERSION
 ./configure && make && make install
 
 cd $HOME/famous-server
-make
+make install
+
+# add client and stripe json files
+# then run `make server`
