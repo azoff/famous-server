@@ -1,4 +1,4 @@
-DIR_LOGS="logs"
+DIR_LOGS=logs
 DIR_MODULES=node_modules
 MAIN_JS=src/famous.js
 RUNNER_JS=node_modules/supervisor/lib/cli-wrapper.js
