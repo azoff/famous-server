@@ -46,9 +46,7 @@
 	};
 
 	Git.prototype.commit = function() {
-		var vargs = Array.prototype.slice.call(arguments);
-		var msg = vargs.shift();
-		var args = ['commit', '-m', '"' + msg + '"'].concat(vargs);
+		var args = ['commit', '-m'].concat(Array.prototype.slice.call(arguments));
 		this.execute.apply(this, args);
 	};
 
