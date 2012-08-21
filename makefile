@@ -17,8 +17,8 @@ install : ;
 	if [ ! -d ${DIR_LOGS} ] ; then mkdir -m 777 ${DIR_LOGS} ; fi
 
 update : ;
-	git pull --rebase; \
-	npm install
+	git reset HEAD --hard; \
+	git pull --rebase;
 
 clean : ;
 	rm -rf ${DIR_MODULES}
