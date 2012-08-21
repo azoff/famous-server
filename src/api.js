@@ -86,7 +86,7 @@
 				callback(null, params); // send response back
 				async.waterfall([ // and process git hooks in parallel
 					async.apply(client.template, { content: content }, 'wrapper'),
-					async.apply(client.update, 'auto: ' + params.name, 'index.html')
+					async.apply(client.update, params.name + ': ' + params.amount, 'index.html')
 				], function(error) {
 					if (error) { logger.error.error(error); }
 					else { logger.access.info('Client Update!', params); }
@@ -148,7 +148,7 @@
 	// PUBLIC API
 	method('_profile',         _profile);
 	method('charges.leapfrog', chargesLeapfrog);
-	method('client.index',     clientRebuildIndex);
+	//method('client.index',     clientRebuildIndex);
 	//method('client.faq',       clientRebuildFaq);
 
 })();
