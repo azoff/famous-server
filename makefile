@@ -7,7 +7,7 @@ all : install server
 
 server : ;
 	export NODE_PATH=.; \
-	nohup node ${RUNNER_JS} ${MAIN_JS} &> ${DIR_LOGS}/supervisor.log &
+	node ${RUNNER_JS} ${MAIN_JS} &
 
 kill : ;
 	killall node
