@@ -149,6 +149,6 @@
 	method('_profile',         _profile);
 	method('charges.leapfrog', chargesLeapfrog);
 	method('client.index',     clientRebuildIndex);
-	method('client.faq',       clientRebuildFaq);
+	//method('client.faq',       clientRebuildFaq);
 
 })();
