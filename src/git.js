@@ -13,6 +13,10 @@
 		];
 	}
 
+	function array(obj) {
+		return Array.prototype.slice.call(obj);
+	}
+
 	function arrayToString(arr) {
 		var result, index = 0, length;
 		length = arr.reduce(function(l, b) {
@@ -36,32 +40,37 @@
 	};
 
 	Git.prototype.add = function() {
-		var args = ['add'].concat(Array.prototype.slice.call(arguments));
+		var args = ['add'].concat(array(arguments));
 		this.execute.apply(this, args);
 	};
 
 	Git.prototype.checkout = function() {
-		var args = ['checkout'].concat(Array.prototype.slice.call(arguments));
+		var args = ['checkout'].concat(array(arguments));
 		this.execute.apply(this, args);
 	};
 
 	Git.prototype.commit = function() {
-		var args = ['commit', '-m'].concat(Array.prototype.slice.call(arguments));
+		var args = ['commit', '-m'].concat(array(arguments));
+		this.execute.apply(this, args);
+	};
+
+	Git.prototype.fetch = function() {
+		var args = ['fetch'].concat(array(arguments));
 		this.execute.apply(this, args);
 	};
 
 	Git.prototype.pull = function() {
-		var args = ['pull'].concat(Array.prototype.slice.call(arguments));
+		var args = ['pull'].concat(array(arguments));
 		this.execute.apply(this, args);
 	};
 
 	Git.prototype.push = function() {
-		var args = ['push'].concat(Array.prototype.slice.call(arguments));
+		var args = ['push'].concat(array(arguments));
 		this.execute.apply(this, args);
 	};
 
 	Git.prototype.execute = function() {
-		var args = Array.prototype.slice.call(arguments);
+		var args = array(arguments);
 		var callback = args.pop();
 		var commands = this.commands.concat(args);
 		var output = { stdout:[], stderr:[], code:-1 };

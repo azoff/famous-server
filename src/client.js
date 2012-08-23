@@ -52,15 +52,18 @@
 		], callback);
 	}
 
-	function update(msg, filePath, fileContents, callback) {
-		filePath = path.join(rootDir, filePath);
+	function update(name, cents, filePath, fileContents, callback) {
+		var absPath = path.join(rootDir, filePath);
+		var branchName = name.replace(/\W+/g, '_') + '_' + cents.toString();
 		async.series([
+			async.apply(git.fetch.bind(git)),
 			async.apply(git.checkout.bind(git), settings.branch),
-			async.apply(git.pull.bind(git), '--rebase', settings.remote, settings.branch),
-			async.apply(fs.writeFile, filePath, fileContents, 'utf8'),
-			async.apply(git.add.bind(git), filePath),
-			async.apply(git.commit.bind(git), msg),
-			async.apply(git.push.bind(git), settings.remote, settings.branch)
+			async.apply(git.pull.bind(git), settings.remote, settings.branch),
+			async.apply(git.checkout.bind(git), '-b', branchName),
+			async.apply(fs.writeFile, absPath, fileContents, 'utf8'),
+			async.apply(git.add.bind(git), absPath),
+			async.apply(git.commit.bind(git), name + ', ' + cents),
+			async.apply(git.push.bind(git), settings.remote, [branchName,settings.branch].join(':'))
 		], callback);
 	}
 

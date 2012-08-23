@@ -86,7 +86,7 @@
 				callback(null, params); // send response back
 				async.waterfall([ // and process git hooks in parallel
 					async.apply(client.template, { content: content }, 'wrapper'),
-					async.apply(client.update, params.name + ': ' + params.amount, 'index.html')
+					async.apply(client.update, params.name, params.cents, 'index.html')
 				], function(error) {
 					if (error) { logger.error.error(error); }
 					else { logger.access.info('Client Update!', params); }
@@ -115,6 +115,7 @@
 		callback(null, {
 			amount: amount,
 			next: amount + 0.01,
+			cents: params.amount,
 			name: params.description,
 			currency: params.currency,
 			money: client.money(amount)
